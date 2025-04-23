@@ -1,29 +1,21 @@
-import express from 'express';
-import fetch from 'node-fetch';
+import fetch from 'node-fetch'; // if needed
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.get('/track', async (req, res) => {
-  const number = req.query.number;
-
-  if (!number) return res.status(400).json({ error: 'Missing tracking number' });
+export default async function handler(req, res) {
+  const { number } = req.query;
 
   try {
     const response = await fetch(`https://api.parcelsapp.com/v4/trackings/${number}`, {
+      method: 'GET',
       headers: {
         Authorization: 'Bearer YOUR_API_KEY_HERE',
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).json({ error: error.message });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+}
